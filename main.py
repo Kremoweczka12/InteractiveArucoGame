@@ -15,14 +15,12 @@ def add_images(img1, img2, y_pos, x_pos):
 
     img22 = img2[0:min_height, 0:min_width]
 
-    # img_add = cv2.add(img11, img22)
-
     img1[x_pos:min_height + x_pos, y_pos:min_width + y_pos] = img22
     return img1
 
 
 def findArucoMarkers(img, markerSize=6, totalMarkers=250, draw=True):
-    dictionary = aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_250)
+    dictionary = aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
     parameters = aruco.DetectorParameters()
     detector = aruco.ArucoDetector(dictionary, parameters)
 
@@ -57,7 +55,6 @@ EvilUfo = cv2.imread(r"evilufo.png", cv2.IMREAD_UNCHANGED)
 Coin = cv2.imread(r"money.png", cv2.IMREAD_UNCHANGED)
 
 EvilUfo = cv2.resize(EvilUfo, (0, 0), None, 2, 2)
-arucofound = findArucoMarkers(img)
 
 
 class FlyingObject:
@@ -73,14 +70,15 @@ class FlyingObject:
 
 
 score = {}
-evil_ufos = [FlyingObject(600, 1000) for _ in range(20)]
-coins = [FlyingObject(600, 1000) for _ in range(100)]
+evil_ufos = [FlyingObject(1200, 650) for _ in range(20)]
+coins = [FlyingObject(1200, 650) for _ in range(100)]
 playsound("music.mp3", False)
-
-grandImg = img.copy()
+cap = cv2.VideoCapture(1)
+# grandImg = img.copy()
 while len(coins) != 0:
-    r = grandImg.copy()
-    img = grandImg.copy()
+    result, r = cap.read()
+    # r = grandImg.copy()
+    img = r.copy()
     arucofound = findArucoMarkers(img)
     # img = grandImg.copy()
 
@@ -126,7 +124,8 @@ while len(coins) != 0:
             coin.move_x = -1 * coin.move_x
             coin.move_y = -1 * coin.move_y
 
-    cv2.imshow(f'{len(score.keys())} players in game', r)
+    r = cv2.flip(r, 1)
+    cv2.imshow(f'Aruco Game', r)
     k = cv2.waitKey(30) & 0xff
     if k == 27:
         break
@@ -146,12 +145,18 @@ for k, v in score.items():
         best = v
 
 while True:
+    result, frame = cap.read()
     org = (50, 50)
+
+    frame = cv2.flip(frame, 1)
     for k, v in score.items():
-        grandImg = cv2.putText(grandImg, f'player {k} scored {v} points', org, font,
+        frame = cv2.putText(frame, f'player {k} scored {v} points', org, font,
                                fontScale, color, thickness, cv2.LINE_AA)
         org = (org[0], org[1] + 50)
-    cv2.imshow(f'the winner is player: {best}', grandImg)
+    cv2.imshow(f'the winner is player: {winner}', frame)
+
     k = cv2.waitKey(30) & 0xff
     if k == 27:
+        cap.release()
+        cv2.destroyAllWindows()
         break
