@@ -10,9 +10,8 @@ def add_image(img1, img2, y_pos, x_pos):
     min_height = min(height1, height2)
     min_width = min(width1, width2)
 
-    img22 = img2[0:min_height, 0:min_width]
-
-    img1[x_pos:min_height + x_pos, y_pos:min_width + y_pos] = img22
+    appended_image = img2[0:min_width, 0:min_height]
+    img1[x_pos:min_width + x_pos, y_pos:min_height + y_pos] = appended_image
     return img1
 
 
@@ -24,7 +23,6 @@ def find_aruco_markers_on_image(img, marker_size=cv2.aruco.DICT_6X6_250, draw=Tr
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     bboxs, ids, rejected = detector.detectMarkers(gray)
 
-    # print(ids)
     if draw:
         aruco.drawDetectedMarkers(img, bboxs)
     return [bboxs, ids]
